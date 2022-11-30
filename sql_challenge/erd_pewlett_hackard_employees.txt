@@ -1,0 +1,51 @@
+
+# Conceptual (without relationships)
+
+departments
+-
+dep_num varchar(10) PK
+dep_name varchar(100)
+last_updated timestamp
+
+
+dep_emp
+-
+id serial PK
+emp_num int FK >- employees.emp_num
+dep_num varchar(10) FK >- departments.dep_num
+last_updated timestamp
+
+dep_mngmt
+-
+id serial PK
+dep_num varchar(10) FK >- departments.dep_num
+emp_num int FK >- employees.emp_num
+last_updated timestamp
+
+
+employees
+-
+emp_num int PK FK >- salary.emp_num
+pos_id varchar(10) FK >- positions.pos_id
+b_day date
+first_name varchar(100)
+last_name varchar(100)
+gender varchar(10)
+start_date date
+last_updated timestamp
+
+salary
+-
+id serial PK
+emp_num int
+income float
+last_updated timestamp
+
+
+positions
+-
+pos_id varchar(10) PK
+position varchar(50)
+last_updated timestamp
+
+
