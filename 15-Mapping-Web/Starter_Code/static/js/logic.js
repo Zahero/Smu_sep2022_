@@ -9,6 +9,7 @@ $(document).ready(function () {
   function doWork() {
     // Store our API endpoint as queryUrl.
     let queryUrl = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson`;
+    let geoURL = 'static/data/PB2002_boundaries.json'
   
     // reset map container
     $("#mapContainer").empty();
@@ -16,13 +17,20 @@ $(document).ready(function () {
   
   
     // Perform a GET request to the query URL.
-    d3.json(queryUrl).then(function (data) {
-      console.log(data);
-  
-      // Using the features array sent back in the API data, create a GeoJSON layer, and add it to the map.
-      makeMap(data);
-  
+
+    d3.json(geoURL).then(function(geoData) {
+      d3.json(queryUrl).then(function (data) {
+        console.log(geoData, data);
+    
+        // Using the features array sent back in the API data, create a GeoJSON layer, and add it to the map.
+        makeMap(geoData, data);
+    
+      });
+      
     });
+
+
+
   }
 
   function makeRadius(mag) {
@@ -32,23 +40,23 @@ $(document).ready(function () {
   function getColor(depth) {
     switch(true){
         case depth >90:
-            return "#E06363";
-        case depth >70:
-            return "#E07363";
-        case depth >50:
-            return "#E07863";
-        case depth >30:
-            return "#E08863";        
-        case depth >10:
-            return "#E09363";
-        default:
-                return "E0B463";
+          return "#ea2c2c";
+          case depth > 70:
+            return "#ea822c";
+          case depth > 50:
+            return "#ee9c00";
+          case depth > 30:
+            return "#eecc00";
+          case depth > 10:
+            return "#d4ee00";
+          default:
+            return "#98ee00";
     }
   }
   
   
   // make map
-  function makeMap(data) {
+  function makeMap(geoData, data) {
   
     // STEP 1: CREATE THE BASE LAYERS
   
@@ -66,8 +74,8 @@ $(document).ready(function () {
     let crcls = [];
   
     for (let i = 0; i < data.features.length; i++) {
-      let equake = data.features[i];
-      let location = equake.geometry.coordinates;
+      let equake = data.features[i],
+       location = equake.geometry.coordinates;
   
       if (location) {
         let circle = L.circle([location[1], location[0]], {
@@ -86,6 +94,8 @@ $(document).ready(function () {
     }
   
     let circleLayer = L.layerGroup(crcls)
+
+    let geoLayer = L.geoJson(geoData);
   
     // STEP 3: CREATE THE LAYER CONTROL OBJECTS
   
@@ -96,7 +106,8 @@ $(document).ready(function () {
   
     // Overlays that can be toggled on or off
     let overlayMaps = {
-      Markers: circleLayer
+      Markers: circleLayer,
+      "Tec Plates": geoLayer
     };
   
   
@@ -104,7 +115,7 @@ $(document).ready(function () {
     let myMap = L.map("map", {
       center: [37.7749, -122.4194],
       zoom: 11,
-      layers: [street, circleLayer]
+      layers: [street, circleLayer, geoLayer]
     });
   
     // STEP 5: ADD LAYER CONTROL TO MAP
